@@ -48,7 +48,19 @@ Generate 5 platform-specific AI music prompts that would reproduce music with th
       { role: "user", content: userMessage },
     ]
   );
-  return JSON.parse(content);
+  
+  // LLM 응답에서 마크다운 코드 블록 제거
+  let cleanedContent = content.trim();
+  if (cleanedContent.startsWith("```json")) {
+    cleanedContent = cleanedContent.substring(7);
+    cleanedContent = cleanedContent.replace(/```$/, "");
+  } else if (cleanedContent.startsWith("```")) {
+    cleanedContent = cleanedContent.substring(3);
+    cleanedContent = cleanedContent.replace(/```$/, "");
+  }
+  cleanedContent = cleanedContent.trim();
+  
+  return JSON.parse(cleanedContent);
 }
 
 /// ── Router Router ────────────────────────────────────────────────────────────────────
