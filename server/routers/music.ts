@@ -3,14 +3,8 @@ import { publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
 import { createMusicAnalysis, getMusicAnalysis, updateMusicAnalysis, listMusicAnalyses } from "../db";
 import { invokeLLM } from "../_core/llm";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import { writeFile, unlink, mkdir } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
 import { nanoid } from "nanoid";
-
-const execFileAsync = promisify(execFile);
+import { analyzeAudioBuffer } from "../analyzeAudio";
 
 // ── Prompt Generator via LLM ──────────────────────────────────────────────────
 async function generatePromptsWithLLM(analysisData: Record<string, unknown>, fileName: string): Promise<Record<string, string>> {
@@ -75,44 +69,7 @@ Generate 5 platform-specific AI music prompts that would reproduce music with th
   return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
 }
 
-// ── Python Analysis Runner ────────────────────────────────────────────────────
-async function runPythonAnalysis(audioBuffer: Buffer, mimeType: string): Promise<Record<string, unknown>> {
-  const ext = mimeType.includes("mp4") ? "m4a" : mimeType.includes("wav") ? "wav" : "mp3";
-  const tmpDir = join(tmpdir(), "music-analysis");
-  await mkdir(tmpDir, { recursive: true });
-  const tmpFile = join(tmpDir, `${nanoid()}.${ext}`);
-
-  try {
-    await writeFile(tmpFile, audioBuffer);
-
-    const scriptPath = join(process.cwd(), "server", "analyze_audio.py");
-
-    // Remove PYTHONHOME/PYTHONPATH that may point to a different Python version (e.g., uv-managed Python 3.13)
-    // to ensure /usr/bin/python3.11 uses its own standard library correctly.
-    const cleanEnv = { ...process.env };
-    delete cleanEnv.PYTHONHOME;
-    delete cleanEnv.PYTHONPATH;
-    delete cleanEnv.NUITKA_PYTHONPATH;
-
-    const { stdout, stderr } = await execFileAsync("/usr/bin/python3.11", [scriptPath, tmpFile], {
-      timeout: 120_000,
-      env: cleanEnv,
-    });
-
-    // stderr may contain harmless warnings (e.g., libmpg123 header notes).
-    // Only treat as error if stdout is empty or not valid JSON.
-    const trimmedOut = stdout.trim();
-    if (!trimmedOut) {
-      throw new Error(`Python analysis produced no output. stderr: ${stderr}`);
-    }
-
-    return JSON.parse(trimmedOut);
-  } finally {
-    await unlink(tmpFile).catch(() => {});
-  }
-}
-
-// ── Router ────────────────────────────────────────────────────────────────────
+/// ── Router Router ────────────────────────────────────────────────────────────────────
 export const musicRouter = router({
   /**
    * Upload audio file (base64) and start analysis.
@@ -149,22 +106,18 @@ export const musicRouter = router({
 
           await updateMusicAnalysis(analysisId, { audioUrl, audioKey: fileKey });
 
-          // Run Python analysis
-          const analysisResult = await runPythonAnalysis(audioBuffer, mimeType);
-
-          if (analysisResult.error) {
-            throw new Error(String(analysisResult.error));
-          }
+          // Run Node.js-native audio analysis (no Python required)
+          const analysisResult = await analyzeAudioBuffer(audioBuffer, mimeType, fileName);
 
           // Generate LLM prompts
-          const generatedPrompts = await generatePromptsWithLLM(analysisResult, fileName);
+          const generatedPrompts = await generatePromptsWithLLM(analysisResult as unknown as Record<string, unknown>, fileName);
 
           // Save results
           await updateMusicAnalysis(analysisId, {
-            bpm: analysisResult.bpm as number,
-            key: analysisResult.key as string,
-            mode: analysisResult.mode as string,
-            keyFull: analysisResult.key_full as string,
+            bpm: analysisResult.bpm,
+            key: analysisResult.key,
+            mode: undefined,
+            keyFull: analysisResult.key_full,
             timeSignature: analysisResult.time_signature as string,
             duration: analysisResult.duration as string,
             energyLevel: analysisResult.energy_level as string,
