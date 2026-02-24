@@ -411,6 +411,7 @@ function UploadSection() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Home() {
+  const [, navigate] = useLocation();
   const HERO_BG = "https://private-us-east-1.manuscdn.com/sessionFile/vJQZfRrBS7xhxbKPFtyTLG/sandbox/LcfYq3NyjRpYBGMTWsGw2t-img-1_1771896152000_na1fn_aGVyby1iZw.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvdkpRWmZSckJTN3hoeGJLUEZ0eVRMRy9zYW5kYm94L0xjZllxM055alJwWUJHTVRXc0d3MnQtaW1nLTFfMTc3MTg5NjE1MjAwMF9uYTFmbl9hR1Z5YnkxaVp3LmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=Y4Sb4Yz-lP~BPz4zvr1lv~lbC0YmFyA4S0b4PR7B8tNFMtb-3lpiCe-Li1AiiJuwU-2XWcpsv0BiEL34xv5JI5yaq4MryY1t1B4pVsfpfX-AWMFLcXtDXCU0RspO0qbdMNwuPbRxc4reCt359rvTac8AENA0csk7FI5g4mwwaAzb5-TEmjExxkPp19HUI3opCNKjCbP9vSinjLm3Ru-Enwc1bpVwmLWovbCSj73aCFTJY7VYcqngN~7GzvkhteWxB49mDyiFu7sQWp4BDIHM-zPNlY90frl4cJQz9WRAulnpfcbImRHN0dVGj2gp190Yxk0JatlNlMu6vOsEgopdnQ__";
   const WAVEFORM_BG = "https://private-us-east-1.manuscdn.com/sessionFile/vJQZfRrBS7xhxbKPFtyTLG/sandbox/LcfYq3NyjRpYBGMTWsGw2t-img-2_1771896160000_na1fn_d2F2ZWZvcm0tYXJ0.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvdkpRWmZSckJTN3hoeGJLUEZ0eVRMRy9zYW5kYm94L0xjZllxM055alJwWUJHTVRXc0d3MnQtaW1nLTJfMTc3MTg5NjE2MDAwMF9uYTFmbl9kMkYyWldadmNtMHRZWEowLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=e-JH6R19HCUpjnwFwuALeyT6j4~2b7NI7HAXaJp4nhsG0mrHvyr4flIQf1wCtrUHnonxTD5I8vdhFmDI17mPcUL6oeHk-ni52IjMWjojB4Vuu6jCPr9YQHrcnL-LyiJIBMUMTlwH0wTpypAISr7DVBi-k4N--msR73~AL7qu3I~4SzFVZZW4HppJUzjZaBG1B7r7qQOmepIUJTXJ4Q5Cj7spAaGyrYDDEsflNGY1qwS19xkEMH-D46hah0cJwdbCzO6jMO~B65pB3reb~F0KPbFffXM1d0Lg7bjNB~LZP6Bt89620m7lu8EmR9NHNd5-ACcHuCzc2SUpfcjjnIhgyA__";
 
@@ -649,6 +650,16 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
           <WaveformBars count={12} />
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/history")}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105"
+            style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.25)", color: "#F5A623", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+            </svg>
+            히스토리
+          </button>
           <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(79,195,247,0.1)", border: "1px solid rgba(79,195,247,0.2)", color: "#4FC3F7", fontFamily: "'DM Sans', sans-serif" }}>
             분석 완료
           </span>

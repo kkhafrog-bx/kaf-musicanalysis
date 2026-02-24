@@ -86,15 +86,27 @@ async function runPythonAnalysis(audioBuffer: Buffer, mimeType: string): Promise
     await writeFile(tmpFile, audioBuffer);
 
     const scriptPath = join(process.cwd(), "server", "analyze_audio.py");
-    const { stdout, stderr } = await execFileAsync("python3.11", [scriptPath, tmpFile], {
+
+    // Remove PYTHONHOME/PYTHONPATH that may point to a different Python version (e.g., uv-managed Python 3.13)
+    // to ensure /usr/bin/python3.11 uses its own standard library correctly.
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.PYTHONHOME;
+    delete cleanEnv.PYTHONPATH;
+    delete cleanEnv.NUITKA_PYTHONPATH;
+
+    const { stdout, stderr } = await execFileAsync("/usr/bin/python3.11", [scriptPath, tmpFile], {
       timeout: 120_000,
+      env: cleanEnv,
     });
 
-    if (stderr && !stdout) {
-      throw new Error(`Python analysis failed: ${stderr}`);
+    // stderr may contain harmless warnings (e.g., libmpg123 header notes).
+    // Only treat as error if stdout is empty or not valid JSON.
+    const trimmedOut = stdout.trim();
+    if (!trimmedOut) {
+      throw new Error(`Python analysis produced no output. stderr: ${stderr}`);
     }
 
-    return JSON.parse(stdout.trim());
+    return JSON.parse(trimmedOut);
   } finally {
     await unlink(tmpFile).catch(() => {});
   }
@@ -193,6 +205,6 @@ export const musicRouter = router({
    */
   listAnalyses: publicProcedure
     .query(async () => {
-      return listMusicAnalyses(10);
+      return listMusicAnalyses(20);
     }),
 });
