@@ -181,7 +181,7 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
         아직 분석된 음악이 없습니다
       </h3>
       <p className="text-sm mb-8 max-w-xs" style={{ color: "rgba(240,237,232,0.45)", fontFamily: "'DM Sans', sans-serif" }}>
-        MP3 파일을 업로드하면 AI가 분석하고 프롬프트를 생성합니다
+        MP3 파일을 업로드하면 분석하고 프롬프트를 생성합니다
       </p>
       <button
         onClick={onUpload}
@@ -262,7 +262,7 @@ export default function History() {
             </svg>
           </div>
           <span className="text-sm font-semibold" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>
-            AI Music Prompt Lab
+            Music Prompt Lab
           </span>
         </div>
 

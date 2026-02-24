@@ -18,3 +18,4 @@
 - [x] 메인 타이틀 "See You Again" → "Kaf-MusicAnalysis" 변경 (홈, 헤더, 푸터, 메타, index.html 등 전체)
 - [x] KafCore 로고 S3 업로드 및 모든 페이지 하단 중앙에 ®KafCore 표시
 - [x] spawn /usr/bin/python3.11 ENOENT 오류 근본 해결 (배포 환경 Python 없음 → Node.js 네이티브 분석으로 전환)
+- [x] 화면에 보이는 모든 "AI" 문구 제거 (헤더, 히어로, 섹션 제목, 버튼, 설명 텍스트, 히스토리, 분석결과 페이지 등)

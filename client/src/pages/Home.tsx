@@ -271,7 +271,7 @@ function UploadSection() {
               내 음악 분석하기
             </h2>
             <p className="text-sm" style={{ color: "rgba(240,237,232,0.55)", fontFamily: "'DM Sans', sans-serif" }}>
-              MP3, WAV, M4A 파일을 업로드하면 AI가 자동으로 분석하고 전문 프롬프트를 생성합니다
+              MP3, WAV, M4A 파일을 업로드하면 자동으로 분석하고 전문 프롬프트를 생성합니다
             </p>
           </div>
         </Section>
@@ -378,7 +378,7 @@ function UploadSection() {
                       <circle cx="11" cy="11" r="8" />
                       <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
-                    AI 음악 분석 시작
+                    음악 분석 시작
                   </>
                 )}
               </button>
@@ -391,7 +391,7 @@ function UploadSection() {
             {[
               { icon: "🎵", label: "BPM & 조성", desc: "템포, 키, 박자 자동 감지" },
               { icon: "🎭", label: "감성 분석", desc: "분위기, 에너지, 다이내믹" },
-              { icon: "🤖", label: "AI 프롬프트", desc: "5개 플랫폼 전용 프롬프트" },
+              { icon: "🎼", label: "전용 프롬프트", desc: "5개 플랫폼 전용 프롬프트" },
             ].map((item, i) => (
               <div
                 key={i}
@@ -420,7 +420,7 @@ export default function Home() {
   const prompts = [
     {
       title: "범용 마스터 프롬프트",
-      subtitle: "Suno AI, Udio, Stable Audio 등 모든 AI 음악 플랫폼에서 사용 가능한 종합 프롬프트",
+      subtitle: "Suno, Udio, Stable Audio 등 모든 음악 생성 플랫폼에서 사용 가능한 종합 프롬프트",
       platform: "Universal",
       tags: [
         { label: "Pop Ballad", type: "amber" as const },
@@ -464,9 +464,9 @@ Dynamic contrast: quiet verses, fuller chorus.
 Mastered for emotional impact, not loudness.`,
     },
     {
-      title: "Suno AI 전용 프롬프트",
-      subtitle: "Suno AI의 스타일 태그 문법에 최적화된 상세 프롬프트",
-      platform: "Suno AI",
+      title: "Suno 전용 프롬프트",
+      subtitle: "Suno의 스타일 태그 문법에 최적화된 상세 프롬프트",
+      platform: "Suno",
       tags: [
         { label: "pop ballad", type: "amber" as const },
         { label: "hip hop", type: "amber" as const },
@@ -556,7 +556,7 @@ Bittersweet, heartfelt, contemplative mood throughout.`,
     },
     {
       title: "Beatoven.ai / AIVA 프롬프트",
-      subtitle: "감성 기반 AI 작곡 플랫폼에 최적화된 감정 중심 프롬프트",
+      subtitle: "감성 기반 작곡 플랫폼에 최적화된 감정 중심 프롬프트",
       platform: "Beatoven / AIVA",
       tags: [
         { label: "Emotion-Driven", type: "amber" as const },
@@ -645,7 +645,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
               <circle cx="18" cy="16" r="3" />
             </svg>
           </div>
-          <span className="font-semibold text-sm" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>AI Music Prompt Lab</span>
+          <span className="font-semibold text-sm" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>Music Prompt Lab</span>
         </div>
         <div className="flex items-center gap-2">
           <WaveformBars count={12} />
@@ -709,14 +709,14 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
                 Kaf-MusicAnalysis
               </h1>
               <p className="text-xl italic mb-6" style={{ color: "#F5A623", fontFamily: "'Playfair Display', serif" }}>
-                — AI 음악 제작 프롬프트 분석 리포트
+                — 음악 제작 프롬프트 분석 리포트
               </p>
             </div>
 
             <div className="fade-in-up delay-200">
               <p className="text-base leading-relaxed mb-8" style={{ color: "rgba(240,237,232,0.7)", fontFamily: "'DM Sans', sans-serif", maxWidth: "600px" }}>
                 세계적인 작곡가의 시각으로 이 곡의 음악적 DNA를 해부하고, 동일한 분위기·박자·리듬·악기·보컬 톤을 재현할 수 있는
-                AI 음악 생성 전문 프롬프트를 제공합니다. Suno AI, Udio, MusicGen 등 주요 플랫폼별 최적화 프롬프트가 포함되어 있습니다.
+                음악 생성 전문 프롬프트를 제공합니다. Suno, Udio, MusicGen 등 주요 플랫폼별 최적화 프롬프트가 포함되어 있습니다.
               </p>
             </div>
 
@@ -865,7 +865,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
             <div className="mb-10">
               <div className="section-accent" />
               <h2 className="text-3xl font-bold mb-2" style={{ color: "#F0EDE8", fontFamily: "'Playfair Display', serif" }}>
-                AI 음악 생성 프롬프트
+                음악 생성 프롬프트
               </h2>
               <p className="text-sm" style={{ color: "rgba(240,237,232,0.5)", fontFamily: "'DM Sans', sans-serif" }}>
                 플랫폼별 최적화된 5종 전문 프롬프트 — 복사하여 즉시 사용 가능
@@ -897,7 +897,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
             {
               step: "01",
               title: "플랫폼 선택",
-              desc: "Suno AI, Udio, MusicGen 등 사용하려는 AI 음악 플랫폼을 선택하고, 해당 플랫폼에 맞는 프롬프트를 위에서 복사합니다.",
+              desc: "Suno, Udio, MusicGen 등 사용하려는 음악 생성 플랫폼을 선택하고, 해당 플랫폼에 맞는 프롬프트를 위에서 복사합니다.",
               color: "amber",
             },
             {
@@ -955,13 +955,13 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
               Kaf-MusicAnalysis
             </p>
             <p className="text-xs" style={{ color: "rgba(240,237,232,0.35)", fontFamily: "'DM Sans', sans-serif" }}>
-              세계적인 작곡가 & AI 프롬프트 전문가의 음악 분석 리포트
+              세계적인 작곡가의 시각으로 분석한 음악 프롬프트 리포트
             </p>
           </div>
           <div className="flex items-center gap-4">
             <WaveformBars count={8} />
             <span className="text-xs" style={{ color: "rgba(240,237,232,0.25)", fontFamily: "'JetBrains Mono', monospace" }}>
-              © 2025 AI Music Prompt Lab
+              © 2025 Music Prompt Lab
             </span>
           </div>
         </div>

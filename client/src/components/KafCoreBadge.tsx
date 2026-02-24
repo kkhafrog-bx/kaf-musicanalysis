@@ -74,7 +74,7 @@ export default function KafCoreBadge() {
               letterSpacing: "0.05em",
             }}
           >
-            AI Music Analysis Platform
+            Music Analysis Platform
           </span>
         </div>
       </div>

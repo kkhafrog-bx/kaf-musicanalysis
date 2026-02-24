@@ -115,7 +115,7 @@ function AnalyzingSkeleton({ fileName }: { fileName: string }) {
     { label: "오디오 파일 로딩", done: true },
     { label: "BPM & 조성 분석", done: true },
     { label: "감성 & 분위기 추출", done: true },
-    { label: "AI 프롬프트 생성 중...", done: false },
+    { label: "프롬프트 생성 중...", done: false },
   ];
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "#0A0E1A" }}>
@@ -215,11 +215,11 @@ export default function AnalysisResult() {
   const genreHints = analysis.genreHints as string[] | null;
 
   const promptCards = prompts ? [
-    { key: "universal", title: "범용 마스터 프롬프트", subtitle: "모든 AI 음악 플랫폼에서 사용 가능한 종합 프롬프트", platform: "Universal" },
-    { key: "suno", title: "Suno AI 전용 프롬프트", subtitle: "Suno AI 스타일 태그 문법에 최적화", platform: "Suno AI" },
+    { key: "universal", title: "범용 마스터 프롬프트", subtitle: "모든 음악 생성 플랫폼에서 사용 가능한 종합 프롬프트", platform: "Universal" },
+    { key: "suno", title: "Suno 전용 프롬프트", subtitle: "Suno 스타일 태그 문법에 최적화", platform: "Suno" },
     { key: "udio", title: "Udio / Stable Audio 프롬프트", subtitle: "자연어 기반 생성 방식에 최적화", platform: "Udio / Stable Audio" },
     { key: "musicgen", title: "MusicGen / AudioCraft 프롬프트", subtitle: "Meta MusicGen 모델에 최적화된 기술적 프롬프트", platform: "MusicGen" },
-    { key: "beatoven", title: "Beatoven.ai / AIVA 프롬프트", subtitle: "감성 기반 AI 작곡 플랫폼에 최적화", platform: "Beatoven / AIVA" },
+    { key: "beatoven", title: "Beatoven.ai / AIVA 프롬프트", subtitle: "감성 기반 작곡 플랫폼에 최적화", platform: "Beatoven / AIVA" },
   ] : [];
 
   return (
@@ -234,7 +234,7 @@ export default function AnalysisResult() {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,166,35,0.15)", border: "1px solid rgba(245,166,35,0.3)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="2"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
           </div>
-          <span className="text-sm font-semibold" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>AI Music Prompt Lab</span>
+          <span className="text-sm font-semibold" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>Music Prompt Lab</span>
         </div>
         <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(79,195,247,0.1)", border: "1px solid rgba(79,195,247,0.2)", color: "#4FC3F7", fontFamily: "'DM Sans', sans-serif" }}>
           분석 완료
@@ -251,7 +251,7 @@ export default function AnalysisResult() {
             {analysis.fileName}
           </h1>
           <p className="text-base italic mb-6" style={{ color: "#F5A623", fontFamily: "'Playfair Display', serif" }}>
-            — AI 음악 분석 리포트
+            — 음악 분석 리포트
           </p>
           <div className="flex flex-wrap gap-2">
             {(genreHints ?? []).map((g, i) => (
@@ -301,7 +301,7 @@ export default function AnalysisResult() {
       {promptCards.length > 0 && (
         <section className="py-12 px-4" style={{ background: "rgba(10,14,26,0.5)" }}>
           <div className="container max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-2" style={{ color: "#F0EDE8", fontFamily: "'Playfair Display', serif" }}>AI 음악 생성 프롬프트</h2>
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#F0EDE8", fontFamily: "'Playfair Display', serif" }}>음악 생성 프롬프트</h2>
             <p className="text-sm mb-8" style={{ color: "rgba(240,237,232,0.5)", fontFamily: "'DM Sans', sans-serif" }}>
               플랫폼별 최적화된 5종 전문 프롬프트 — 복사하여 즉시 사용 가능
             </p>
