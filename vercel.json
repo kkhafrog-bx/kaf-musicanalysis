@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "framework": "other",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

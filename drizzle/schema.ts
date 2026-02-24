@@ -64,3 +64,24 @@ export const musicAnalyses = mysqlTable("music_analyses", {
 
 export type MusicAnalysis = typeof musicAnalyses.$inferSelect;
 export type InsertMusicAnalysis = typeof musicAnalyses.$inferInsert;
+
+/**
+ * LLM 설정 테이블 — 사용자별 LLM API 선택 및 키 저장
+ */
+export const llmSettings = mysqlTable("llmSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** LLM 제공자: "manus" | "openai" | "google" */
+  provider: mysqlEnum("provider", ["manus", "openai", "google"]).default("manus").notNull(),
+  /** API 키 (암호화 권장, 현재는 평문 저장) */
+  apiKey: text("apiKey"),
+  /** OpenAI 모델명 (예: gpt-4, gpt-3.5-turbo) */
+  openaiModel: varchar("openaiModel", { length: 64 }).default("gpt-3.5-turbo"),
+  /** Google 모델명 (예: gemini-pro) */
+  googleModel: varchar("googleModel", { length: 64 }).default("gemini-pro"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LLMSettings = typeof llmSettings.$inferSelect;
+export type InsertLLMSettings = typeof llmSettings.$inferInsert;

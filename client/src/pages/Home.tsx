@@ -652,6 +652,17 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => navigate("/settings")}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105"
+            style={{ background: "rgba(79,195,247,0.1)", border: "1px solid rgba(79,195,247,0.25)", color: "#4FC3F7", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24" />
+            </svg>
+            설정
+          </button>
+          <button
             onClick={() => navigate("/history")}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105"
             style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.25)", color: "#F5A623", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}

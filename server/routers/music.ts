@@ -2,7 +2,7 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
 import { createMusicAnalysis, getMusicAnalysis, updateMusicAnalysis, listMusicAnalyses } from "../db";
-import { invokeLLM } from "../_core/llm";
+import { generateWithSelectedLLM } from "../llmConfig";
 import { nanoid } from "nanoid";
 import { analyzeAudioBuffer } from "../analyzeAudio";
 
@@ -39,34 +39,16 @@ Spectral Centroid: ${analysisData.spectral_centroid_hz} Hz
 
 Generate 5 platform-specific AI music prompts that would reproduce music with these exact characteristics.`;
 
-  const response = await invokeLLM({
-    messages: [
+  // 단, generatePromptsWithLLM은 userId를 받지 않으며, 기본적으로 Manus LLM을 사용합니다.
+  // 나중에 userId를 매개변로 받도록 수정되면 generateWithSelectedLLM으로 교체할 수 있습니다.
+  const content = await generateWithSelectedLLM(
+    0, // 단, 매개변 userId를 받도록 수정 필요
+    [
       { role: "system", content: systemPrompt },
       { role: "user", content: userMessage },
-    ],
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "music_prompts",
-        strict: true,
-        schema: {
-          type: "object",
-          properties: {
-            universal: { type: "string", description: "Universal prompt for any AI music platform" },
-            suno: { type: "string", description: "Suno AI optimized prompt" },
-            udio: { type: "string", description: "Udio/Stable Audio optimized prompt" },
-            musicgen: { type: "string", description: "MusicGen/AudioCraft optimized prompt" },
-            beatoven: { type: "string", description: "Beatoven.ai/AIVA optimized prompt" },
-          },
-          required: ["universal", "suno", "udio", "musicgen", "beatoven"],
-          additionalProperties: false,
-        },
-      },
-    },
-  });
-
-  const content = response.choices[0].message.content;
-  return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+    ]
+  );
+  return JSON.parse(content);
 }
 
 /// ── Router Router ────────────────────────────────────────────────────────────────────
@@ -82,7 +64,7 @@ export const musicRouter = router({
       mimeType: z.string().default("audio/mpeg"),
       fileSizeBytes: z.number().max(16 * 1024 * 1024), // 16MB limit
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { fileName, fileBase64, mimeType, fileSizeBytes } = input;
 
       if (fileSizeBytes > 16 * 1024 * 1024) {

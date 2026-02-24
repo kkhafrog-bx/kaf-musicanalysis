@@ -19,3 +19,7 @@
 - [x] KafCore 로고 S3 업로드 및 모든 페이지 하단 중앙에 ®KafCore 표시
 - [x] spawn /usr/bin/python3.11 ENOENT 오류 근본 해결 (배포 환경 Python 없음 → Node.js 네이티브 분석으로 전환)
 - [x] 화면에 보이는 모든 "AI" 문구 제거 (헤더, 히어로, 섹션 제목, 버튼, 설명 텍스트, 히스토리, 분석결과 페이지 등)
+- [x] Vercel 배포 오류 수정 (vercel.json 설정, Output Directory 지정)
+- [x] LLM API 선택 기능 (OpenAI / Google / Manus 중 선택)
+- [x] 설정 페이지에서 API 키 입력 UI 추가
+- [x] 백엔드에서 선택된 API 키로 LLM 호출하도록 수정

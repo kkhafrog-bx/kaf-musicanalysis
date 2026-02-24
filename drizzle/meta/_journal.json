@@ -15,6 +15,13 @@
       "when": 1771897162615,
       "tag": "0001_common_scalphunter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771910733607,
+      "tag": "0002_nosy_shriek",
+      "breakpoints": true
     }
   ]
 }

@@ -7,13 +7,15 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import AnalysisResult from "./pages/AnalysisResult";
 import History from "./pages/History";
+import Settings from "./pages/Settings";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/ "} component={Home} />
       <Route path={"/analysis/:id"} component={AnalysisResult} />
       <Route path={"/history"} component={History} />
+      <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
