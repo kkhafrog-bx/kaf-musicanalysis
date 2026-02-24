@@ -5,8 +5,10 @@
  * Layout: Full-page scroll with sticky header, hero section, analysis grid, prompt cards
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 // ─── Waveform Animation Component ─────────────────────────────────────────────
 function WaveformBars({ count = 20, className = "" }: { count?: number; className?: string }) {
@@ -184,6 +186,226 @@ function PromptCard({
         </div>
       </div>
     </Section>
+  );
+}
+
+// ─── Upload Section ──────────────────────────────────────────────────────────
+function UploadSection() {
+  const [, navigate] = useLocation();
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const startAnalysisMutation = trpc.music.startAnalysis.useMutation({
+    onSuccess: (data) => {
+      navigate(`/analysis/${data.analysisId}`);
+    },
+    onError: (err) => {
+      toast.error(`업로드 실패: ${err.message}`);
+      setIsUploading(false);
+    },
+  });
+
+  const handleFile = useCallback((file: File) => {
+    const allowed = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/mp4", "audio/m4a", "audio/ogg", "audio/webm"];
+    if (!allowed.some(t => file.type.includes(t.split("/")[1])) && !file.name.match(/\.(mp3|wav|m4a|ogg|webm)$/i)) {
+      toast.error("MP3, WAV, M4A, OGG 형식만 지원합니다.");
+      return;
+    }
+    if (file.size > 16 * 1024 * 1024) {
+      toast.error("파일 크기는 16MB 이하여야 합니다.");
+      return;
+    }
+    setSelectedFile(file);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }, [handleFile]);
+
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = () => setIsDragging(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = (e.target?.result as string).split(",")[1];
+        await startAnalysisMutation.mutateAsync({
+          fileName: selectedFile.name,
+          fileBase64: base64,
+          mimeType: selectedFile.type || "audio/mpeg",
+          fileSizeBytes: selectedFile.size,
+        });
+      };
+      reader.readAsDataURL(selectedFile);
+    } catch {
+      setIsUploading(false);
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  return (
+    <section id="upload" className="py-20" style={{ background: "rgba(10,14,26,0.6)" }}>
+      <div className="container max-w-3xl mx-auto">
+        <Section>
+          <div className="mb-10 text-center">
+            <div className="section-accent mx-auto mb-4" />
+            <h2 className="text-3xl font-bold mb-3" style={{ color: "#F0EDE8", fontFamily: "'Playfair Display', serif" }}>
+              내 음악 분석하기
+            </h2>
+            <p className="text-sm" style={{ color: "rgba(240,237,232,0.55)", fontFamily: "'DM Sans', sans-serif" }}>
+              MP3, WAV, M4A 파일을 업로드하면 AI가 자동으로 분석하고 전문 프롬프트를 생성합니다
+            </p>
+          </div>
+        </Section>
+
+        <Section delay={100}>
+          {/* Drop Zone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => !selectedFile && fileInputRef.current?.click()}
+            className="rounded-2xl transition-all duration-300 cursor-pointer"
+            style={{
+              background: isDragging ? "rgba(245,166,35,0.06)" : "rgba(22,29,46,0.7)",
+              border: `2px dashed ${isDragging ? "rgba(245,166,35,0.6)" : selectedFile ? "rgba(79,195,247,0.4)" : "rgba(245,166,35,0.2)"}`,
+              padding: "3rem 2rem",
+              textAlign: "center",
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
+              className="hidden"
+              onChange={handleInputChange}
+            />
+
+            {!selectedFile ? (
+              <>
+                <div className="flex justify-center mb-4">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                    style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.25)" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="1.5">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-base font-semibold mb-1" style={{ color: "#F0EDE8", fontFamily: "'DM Sans', sans-serif" }}>
+                  {isDragging ? "파일을 여기에 놓으세요" : "파일을 드래그하거나 클릭하여 선택"}
+                </p>
+                <p className="text-xs" style={{ color: "rgba(240,237,232,0.4)", fontFamily: "'DM Sans', sans-serif" }}>
+                  MP3, WAV, M4A, OGG · 최대 16MB
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-center mb-4">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                    style={{ background: "rgba(79,195,247,0.1)", border: "1px solid rgba(79,195,247,0.3)" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" strokeWidth="1.5">
+                      <path d="M9 18V5l12-2v13" />
+                      <circle cx="6" cy="18" r="3" />
+                      <circle cx="18" cy="16" r="3" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-base font-semibold mb-1" style={{ color: "#4FC3F7", fontFamily: "'DM Sans', sans-serif" }}>
+                  {selectedFile.name}
+                </p>
+                <p className="text-xs mb-4" style={{ color: "rgba(240,237,232,0.4)", fontFamily: "'DM Sans', sans-serif" }}>
+                  {formatSize(selectedFile.size)}
+                </p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                  className="text-xs px-3 py-1 rounded-lg transition-colors"
+                  style={{ color: "rgba(240,237,232,0.4)", border: "1px solid rgba(240,237,232,0.1)" }}
+                >
+                  다른 파일 선택
+                </button>
+              </>
+            )}
+          </div>
+        </Section>
+
+        {selectedFile && (
+          <Section delay={150}>
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleAnalyze}
+                disabled={isUploading}
+                className="flex items-center gap-3 px-8 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
+                style={{
+                  background: isUploading ? "rgba(245,166,35,0.5)" : "#F5A623",
+                  color: "#0A0E1A",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {isUploading ? (
+                  <>
+                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    분석 중... (30~60초 소요)
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    AI 음악 분석 시작
+                  </>
+                )}
+              </button>
+            </div>
+          </Section>
+        )}
+
+        <Section delay={200}>
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            {[
+              { icon: "🎵", label: "BPM & 조성", desc: "템포, 키, 박자 자동 감지" },
+              { icon: "🎭", label: "감성 분석", desc: "분위기, 에너지, 다이내믹" },
+              { icon: "🤖", label: "AI 프롬프트", desc: "5개 플랫폼 전용 프롬프트" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="rounded-xl p-4 text-center"
+                style={{ background: "rgba(22,29,46,0.5)", border: "1px solid rgba(245,166,35,0.08)" }}
+              >
+                <div className="text-2xl mb-2">{item.icon}</div>
+                <p className="text-xs font-semibold mb-1" style={{ color: "#F5A623", fontFamily: "'DM Sans', sans-serif" }}>{item.label}</p>
+                <p className="text-xs" style={{ color: "rgba(240,237,232,0.4)", fontFamily: "'DM Sans', sans-serif" }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      </div>
+    </section>
   );
 }
 
@@ -703,6 +925,9 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
           ))}
         </div>
       </section>
+
+      {/* ── Upload Section ─────────────────────────────────────────────── */}
+      <UploadSection />
 
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <footer
