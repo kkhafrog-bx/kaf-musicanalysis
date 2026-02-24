@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import KafCoreBadge from "@/components/KafCoreBadge";
 
 // ─── Waveform Bars ─────────────────────────────────────────────────────────────
 function WaveformBars({ count = 20, active = true }: { count?: number; active?: boolean }) {
@@ -330,6 +331,9 @@ export default function AnalysisResult() {
           </button>
         </div>
       </footer>
+
+      {/* KafCore Brand Badge */}
+      <KafCoreBadge />
     </div>
   );
 }

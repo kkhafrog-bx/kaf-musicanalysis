@@ -5,6 +5,7 @@
 
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import KafCoreBadge from "@/components/KafCoreBadge";
 
 // ─── Status Badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
@@ -370,6 +371,9 @@ export default function History() {
           </p>
         </div>
       </footer>
+
+      {/* KafCore Brand Badge */}
+      <KafCoreBadge />
     </div>
   );
 }

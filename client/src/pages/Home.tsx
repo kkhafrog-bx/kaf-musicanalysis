@@ -9,6 +9,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import KafCoreBadge from "@/components/KafCoreBadge";
 
 // ─── Waveform Animation Component ─────────────────────────────────────────────
 function WaveformBars({ count = 20, className = "" }: { count?: number; className?: string }) {
@@ -965,6 +966,9 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
           </div>
         </div>
       </footer>
+
+      {/* ── KafCore Brand Badge ─────────────────────────────────────────── */}
+      <KafCoreBadge />
     </div>
   );
 }
