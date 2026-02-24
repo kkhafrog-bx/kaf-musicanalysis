@@ -323,7 +323,7 @@ export default function AnalysisResult() {
       <footer className="py-10 px-4" style={{ borderTop: "1px solid rgba(245,166,35,0.08)", background: "rgba(10,14,26,0.8)" }}>
         <div className="container max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm font-semibold" style={{ color: "#F5A623", fontFamily: "'Playfair Display', serif" }}>
-            See You Again — AI Music Prompt Lab
+            Kaf-MusicAnalysis
           </p>
           <button onClick={() => navigate("/")} className="text-xs px-4 py-2 rounded-lg transition-colors" style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.2)", color: "#F5A623", fontFamily: "'DM Sans', sans-serif" }}>
             다른 음악 분석하기

@@ -705,7 +705,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
                 className="text-5xl md:text-6xl font-bold mb-3 leading-tight"
                 style={{ color: "#F0EDE8", fontFamily: "'Playfair Display', serif" }}
               >
-                See You Again
+                Kaf-MusicAnalysis
               </h1>
               <p className="text-xl italic mb-6" style={{ color: "#F5A623", fontFamily: "'Playfair Display', serif" }}>
                 — AI 음악 제작 프롬프트 분석 리포트
@@ -850,7 +850,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
             <div className="relative h-full flex flex-col items-center justify-center gap-4">
               <WaveformBars count={40} />
               <p className="text-sm font-medium" style={{ color: "rgba(240,237,232,0.6)", fontFamily: "'DM Sans', sans-serif" }}>
-                오디오 파형 시각화 — See You Again (3:57)
+                오디오 파형 시각화 — Kaf-MusicAnalysis
               </p>
             </div>
           </div>
@@ -951,7 +951,7 @@ with enough rhythmic grounding to feel contemporary and relatable.`,
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold mb-1" style={{ color: "#F5A623", fontFamily: "'Playfair Display', serif" }}>
-              See You Again — AI Music Prompt Lab
+              Kaf-MusicAnalysis
             </p>
             <p className="text-xs" style={{ color: "rgba(240,237,232,0.35)", fontFamily: "'DM Sans', sans-serif" }}>
               세계적인 작곡가 & AI 프롬프트 전문가의 음악 분석 리포트

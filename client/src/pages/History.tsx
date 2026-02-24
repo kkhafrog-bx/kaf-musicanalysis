@@ -363,7 +363,7 @@ export default function History() {
       <footer className="py-8 px-4" style={{ borderTop: "1px solid rgba(245,166,35,0.06)", background: "rgba(10,14,26,0.6)" }}>
         <div className="container max-w-4xl mx-auto flex items-center justify-between">
           <p className="text-xs" style={{ color: "rgba(240,237,232,0.25)", fontFamily: "'DM Sans', sans-serif" }}>
-            See You Again — AI Music Prompt Lab
+            Kaf-MusicAnalysis
           </p>
           <p className="text-xs" style={{ color: "rgba(240,237,232,0.2)", fontFamily: "'JetBrains Mono', monospace" }}>
             © 2025

@@ -15,3 +15,4 @@
 - [x] spawn python3.11 ENOENT 오류 수정 (Python 경로 문제)
 - [x] 분석 히스토리 페이지 (분석된 음악 목록 카드 뷰)
 - [x] 히스토리 페이지 네비게이션 연결
+- [x] 메인 타이틀 "See You Again" → "Kaf-MusicAnalysis" 변경 (홈, 헤더, 푸터, 메타, index.html 등 전체)
