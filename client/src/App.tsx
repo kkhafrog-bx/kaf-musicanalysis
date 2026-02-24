@@ -12,7 +12,7 @@ import Settings from "./pages/Settings";
 function Router() {
   return (
     <Switch>
-      <Route path={"/ "} component={Home} />
+      <Route path={"/"} component={Home} />
       <Route path={"/analysis/:id"} component={AnalysisResult} />
       <Route path={"/history"} component={History} />
       <Route path={"/settings"} component={Settings} />
