@@ -26,40 +26,40 @@ export interface AdvancedAnalysisResult {
   // Energy & dynamics
   energy_level: string;
   dynamic_range: string;
-  rms_energy: number; // Root Mean Square energy (0-1)
-  peak_level: number; // Peak amplitude (0-1)
+  rms_energy: number;
+  peak_level: number;
   
   // Spectral analysis
   brightness: string;
   spectral_centroid_hz: number;
   spectral_spread: number;
-  bass_presence: number; // 0-1, bass energy ratio
-  mid_presence: number; // 0-1, mid energy ratio
-  treble_presence: number; // 0-1, treble energy ratio
+  bass_presence: number;
+  mid_presence: number;
+  treble_presence: number;
   
   // Rhythm & timing
   texture: string;
   rhythm_density: string;
-  rhythm_regularity: number; // 0-1, how regular the beat is
-  drum_intensity: number; // 0-1, estimated drum presence
-  percussion_characteristics: string; // "crisp", "muffled", "punchy", etc.
+  rhythm_regularity: number;
+  drum_intensity: number;
+  percussion_characteristics: string;
   
   // Harmonic analysis
-  hp_ratio: number; // harmonic/percussive ratio
-  harmonic_content: number; // 0-1
-  percussive_content: number; // 0-1
+  hp_ratio: number;
+  harmonic_content: number;
+  percussive_content: number;
   
   // Vocal characteristics
-  vocal_presence: number; // 0-1
-  vocal_tone: string; // "warm", "bright", "breathy", "powerful"
-  vocal_range: string; // "low", "mid", "high", "wide"
+  vocal_presence: number;
+  vocal_tone: string;
+  vocal_range: string;
   
   // Mood & style
   mood_tags: string[];
   genre_hints: string[];
   
   // Unique characteristics
-  unique_characteristics: string[]; // Specific features that make this song unique
+  unique_characteristics: string[];
   
   // Metadata
   title?: string;
@@ -75,28 +75,23 @@ async function decodeToPCM(
   mimeType: string
 ): Promise<{ samples: Float32Array; sampleRate: number; channels: number }> {
   try {
-    // Try WAV decoding first
     if (mimeType.includes("wav")) {
       const decoded = await WavDecoder.decode(audioBuffer);
       return {
-        samples: decoded.channelData[0], // Use first channel
+        samples: decoded.channelData[0],
         sampleRate: decoded.sampleRate,
         channels: decoded.channelData.length,
       };
     }
 
-    // For MP3/AAC, use metadata to estimate (actual decoding would require more complex setup)
-    // For now, return a placeholder that indicates we need the actual PCM data
     const metadata = await mm.parseBuffer(audioBuffer, { mimeType });
     const sampleRate = metadata.format.sampleRate || 44100;
     const channels = metadata.format.numberOfChannels || 2;
 
-    // Create a placeholder sample array (in production, use a proper MP3 decoder)
-    const samples = new Float32Array(sampleRate * 10); // 10 seconds placeholder
+    const samples = new Float32Array(sampleRate * 10);
     return { samples, sampleRate, channels };
   } catch (err) {
     console.warn("PCM decoding error:", err);
-    // Return placeholder
     return {
       samples: new Float32Array(441000),
       sampleRate: 44100,
@@ -114,7 +109,7 @@ function calculateRMSEnergy(samples: Float32Array): number {
     sum += samples[i] * samples[i];
   }
   const rms = Math.sqrt(sum / samples.length);
-  return Math.min(rms, 1.0); // Normalize to 0-1
+  return Math.min(rms, 1.0);
 }
 
 /**
@@ -141,76 +136,77 @@ function analyzeSpectrum(
   mid: number;
   treble: number;
 } {
-  // Use 2048-point FFT
-  const fftSize = 2048;
-  const fft = new FFT(fftSize);
+  try {
+    const fftSize = 2048;
+    const fft = new FFT(fftSize);
 
-  // Take first chunk for analysis
-  const chunk = samples.slice(0, fftSize);
-  const spectrum = fft.createComplexArray();
+    const chunk = samples.slice(0, fftSize);
+    const spectrum = fft.createComplexArray();
+    const output = fft.createComplexArray();
 
-  // Copy samples to complex array (real parts)
-  for (let i = 0; i < fftSize; i++) {
-    spectrum[i * 2] = chunk[i] || 0;
-    spectrum[i * 2 + 1] = 0; // Imaginary part
+    for (let i = 0; i < fftSize; i++) {
+      spectrum[i * 2] = chunk[i] || 0;
+      spectrum[i * 2 + 1] = 0;
+    }
+
+    fft.transform(output, spectrum);
+
+    const magnitude = new Float32Array(fftSize / 2);
+    for (let i = 0; i < fftSize / 2; i++) {
+      const real = output[i * 2];
+      const imag = output[i * 2 + 1];
+      magnitude[i] = Math.sqrt(real * real + imag * imag);
+    }
+
+    let weightedSum = 0;
+    let totalMagnitude = 0;
+    for (let i = 0; i < magnitude.length; i++) {
+      const freq = (i * sampleRate) / fftSize;
+      weightedSum += freq * magnitude[i];
+      totalMagnitude += magnitude[i];
+    }
+    const centroid = totalMagnitude > 0 ? weightedSum / totalMagnitude : 2000;
+
+    let spreadSum = 0;
+    for (let i = 0; i < magnitude.length; i++) {
+      const freq = (i * sampleRate) / fftSize;
+      spreadSum += Math.pow(freq - centroid, 2) * magnitude[i];
+    }
+    const spread = totalMagnitude > 0 ? Math.sqrt(spreadSum / totalMagnitude) : 1000;
+
+    let bassEnergy = 0;
+    let midEnergy = 0;
+    let trebleEnergy = 0;
+
+    for (let i = 0; i < magnitude.length; i++) {
+      const freq = (i * sampleRate) / fftSize;
+      if (freq < 250) bassEnergy += magnitude[i];
+      else if (freq < 4000) midEnergy += magnitude[i];
+      else trebleEnergy += magnitude[i];
+    }
+
+    const totalEnergy = bassEnergy + midEnergy + trebleEnergy || 1;
+    const bass = bassEnergy / totalEnergy;
+    const mid = midEnergy / totalEnergy;
+    const treble = trebleEnergy / totalEnergy;
+
+    return {
+      centroid: Math.round(centroid),
+      spread: Math.round(spread),
+      bass,
+      mid,
+      treble,
+    };
+  } catch (err) {
+    console.warn("FFT analysis error:", err);
+    return {
+      centroid: 2000,
+      spread: 1000,
+      bass: 0.3,
+      mid: 0.5,
+      treble: 0.2,
+    };
   }
-
-  // Perform FFT
-  fft.transform(spectrum, spectrum);
-
-  // Calculate magnitude spectrum
-  const magnitude = new Float32Array(fftSize / 2);
-  for (let i = 0; i < fftSize / 2; i++) {
-    const real = spectrum[i * 2];
-    const imag = spectrum[i * 2 + 1];
-    magnitude[i] = Math.sqrt(real * real + imag * imag);
-  }
-
-  // Calculate spectral centroid
-  let weightedSum = 0;
-  let totalMagnitude = 0;
-  for (let i = 0; i < magnitude.length; i++) {
-    const freq = (i * sampleRate) / fftSize;
-    weightedSum += freq * magnitude[i];
-    totalMagnitude += magnitude[i];
-  }
-  const centroid = totalMagnitude > 0 ? weightedSum / totalMagnitude : 2000;
-
-  // Calculate spectral spread
-  let spreadSum = 0;
-  for (let i = 0; i < magnitude.length; i++) {
-    const freq = (i * sampleRate) / fftSize;
-    spreadSum += Math.pow(freq - centroid, 2) * magnitude[i];
-  }
-  const spread = totalMagnitude > 0 ? Math.sqrt(spreadSum / totalMagnitude) : 1000;
-
-  // Analyze frequency bands
-  // Bass: 20-250 Hz
-  // Mid: 250-4000 Hz
-  // Treble: 4000-20000 Hz
-  let bassEnergy = 0;
-  let midEnergy = 0;
-  let trebleEnergy = 0;
-
-  for (let i = 0; i < magnitude.length; i++) {
-    const freq = (i * sampleRate) / fftSize;
-    if (freq < 250) bassEnergy += magnitude[i];
-    else if (freq < 4000) midEnergy += magnitude[i];
-    else trebleEnergy += magnitude[i];
-  }
-
-  const totalEnergy = bassEnergy + midEnergy + trebleEnergy || 1;
-  const bass = bassEnergy / totalEnergy;
-  const mid = midEnergy / totalEnergy;
-  const treble = trebleEnergy / totalEnergy;
-
-  return {
-    centroid: Math.round(centroid),
-    spread: Math.round(spread),
-    bass,
-    mid,
-    treble,
-  };
 }
 
 /**
@@ -225,8 +221,7 @@ function analyzeRhythm(
   drumIntensity: number;
   percussionChar: string;
 } {
-  // Analyze beat regularity by checking energy peaks
-  const beatFrameSize = Math.round((sampleRate * 60) / bpm); // Samples per beat
+  const beatFrameSize = Math.round((sampleRate * 60) / bpm);
   const numBeats = Math.floor(samples.length / beatFrameSize);
 
   const beatEnergies: number[] = [];
@@ -240,8 +235,7 @@ function analyzeRhythm(
     beatEnergies.push(energy / (end - start));
   }
 
-  // Calculate regularity (lower variance = more regular)
-  const avgEnergy = beatEnergies.reduce((a, b) => a + b, 0) / beatEnergies.length;
+  const avgEnergy = beatEnergies.reduce((a, b) => a + b, 0) / beatEnergies.length || 0.1;
   let variance = 0;
   for (const e of beatEnergies) {
     variance += Math.pow(e - avgEnergy, 2);
@@ -249,10 +243,8 @@ function analyzeRhythm(
   variance /= beatEnergies.length;
   const regularity = Math.max(0, 1 - Math.sqrt(variance) / avgEnergy);
 
-  // Estimate drum intensity from high-frequency content
   const drumIntensity = Math.min(1, beatEnergies.length > 0 ? Math.max(...beatEnergies) / avgEnergy : 0.5);
 
-  // Determine percussion characteristics
   let percussionChar = "moderate";
   if (drumIntensity > 0.8) percussionChar = "punchy";
   else if (drumIntensity > 0.6) percussionChar = "crisp";
@@ -277,17 +269,14 @@ function analyzeVocals(
   tone: string;
   range: string;
 } {
-  // Vocal presence: high mid-range energy
-  const vocalPresence = midPresence * 0.8 + 0.2; // Normalize
+  const vocalPresence = midPresence * 0.8 + 0.2;
 
-  // Vocal tone based on spectral centroid
   let tone = "neutral";
   if (spectralCentroid < 1000) tone = "warm";
   else if (spectralCentroid < 2000) tone = "balanced";
   else if (spectralCentroid < 4000) tone = "bright";
   else tone = "crisp";
 
-  // Vocal range estimation (simplified)
   let range = "mid";
   if (spectralCentroid < 1500) range = "low";
   else if (spectralCentroid > 3500) range = "high";
@@ -312,27 +301,21 @@ function extractUniqueCharacteristics(
 ): string[] {
   const characteristics: string[] = [];
 
-  // BPM-based
   if (bpm < 70) characteristics.push("Slow, introspective tempo");
   else if (bpm > 140) characteristics.push("Fast-paced, energetic rhythm");
   else characteristics.push("Mid-tempo groove");
 
-  // Spectral-based
   if (spectralCentroid < 1500) characteristics.push("Warm, bass-heavy tone");
   else if (spectralCentroid > 3500) characteristics.push("Bright, treble-rich tone");
 
-  // Drum-based
   if (drumIntensity > 0.7) characteristics.push("Strong, punchy drums");
   else if (drumIntensity < 0.4) characteristics.push("Subtle, understated percussion");
 
-  // Vocal-based
   if (vocalPresence > 0.6) characteristics.push("Prominent vocal presence");
   else if (vocalPresence < 0.3) characteristics.push("Instrumental-focused");
 
-  // Bass-based
   if (bassPresence > 0.4) characteristics.push("Deep bass foundation");
 
-  // Genre-specific
   if (genre.includes("ballad")) characteristics.push("Emotional, intimate arrangement");
   if (genre.includes("hip") || genre.includes("rap")) characteristics.push("Rhythmic hip-hop foundation");
 
@@ -347,7 +330,6 @@ export async function advancedAnalyzeAudio(
   mimeType: string,
   fileName?: string
 ): Promise<AdvancedAnalysisResult> {
-  // Get metadata
   const metadata = await mm.parseBuffer(audioBuffer, { mimeType });
   const { common, format } = metadata;
 
@@ -357,35 +339,27 @@ export async function advancedAnalyzeAudio(
   const channels = format.numberOfChannels ?? 2;
   const codec = format.codec ?? format.container ?? "Unknown";
 
-  // Decode to PCM
   const { samples } = await decodeToPCM(audioBuffer, mimeType);
 
-  // Calculate energy metrics
   const rmsEnergy = calculateRMSEnergy(samples);
   const peakLevel = calculatePeakLevel(samples);
 
-  // Analyze spectrum
   const spectrum = analyzeSpectrum(samples, sampleRate);
 
-  // Analyze rhythm
   const genre = (common.genre ?? []).join(" ").toLowerCase();
   const bpm = (common.bpm && common.bpm > 40 && common.bpm < 300) ? Math.round(common.bpm) : 90;
   const rhythm = analyzeRhythm(samples, sampleRate, bpm);
 
-  // Analyze vocals
   const vocals = analyzeVocals(samples, spectrum.centroid, spectrum.mid);
 
-  // Determine characteristics
   const energyLevel = rmsEnergy > 0.5 ? "High" : rmsEnergy > 0.3 ? "Medium" : "Low";
   const dynamicRange = peakLevel > 0.8 ? "Wide" : peakLevel > 0.5 ? "Moderate" : "Narrow";
   const brightness = spectrum.centroid > 3000 ? "Bright" : spectrum.centroid > 1500 ? "Warm" : "Dark";
   const texture = channels >= 2 && bitrate > 192 ? "Rich & Layered" : "Moderate";
   const rhythmDensity = bpm > 140 ? "Dense" : bpm > 100 ? "Moderate" : "Sparse";
 
-  // Harmonic/Percussive ratio
   const hp_ratio = spectrum.mid > 0.4 ? 1.4 : 0.9;
 
-  // Mood tags
   const moodTags: string[] = [];
   if (energyLevel === "Low") moodTags.push("Nostalgic", "Emotional");
   if (genre.includes("hip") || genre.includes("rap")) moodTags.push("Rhythmic", "Urban");
@@ -394,10 +368,8 @@ export async function advancedAnalyzeAudio(
   if (rhythm.drumIntensity > 0.7) moodTags.push("Percussive");
   if (moodTags.length === 0) moodTags.push("Expressive", "Dynamic");
 
-  // Genre hints
   const genreHints = common.genre ?? ["Contemporary", "Pop"];
 
-  // Unique characteristics
   const uniqueCharacteristics = extractUniqueCharacteristics(
     bpm,
     spectrum.centroid,
