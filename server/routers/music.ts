@@ -5,11 +5,12 @@ import { createMusicAnalysis, getMusicAnalysis, updateMusicAnalysis, listMusicAn
 import { generateWithSelectedLLM } from "../llmConfig";
 import { nanoid } from "nanoid";
 import { analyzeAudioBuffer } from "../analyzeAudio";
+import { advancedAnalyzeAudio } from "../advancedAudioAnalysis";
 
 // ── Prompt Generator via LLM ──────────────────────────────────────────────────
 async function generatePromptsWithLLM(analysisData: Record<string, unknown>, fileName: string): Promise<Record<string, string>> {
   const systemPrompt = `You are a world-class music composer and AI prompt engineering expert.
-Given music analysis data, generate professional AI music generation prompts in English.
+Given detailed music analysis data including spectral analysis, rhythm characteristics, vocal properties, and unique features, generate professional AI music generation prompts in English.
 You must return a JSON object with exactly these 5 keys:
 - "universal": A comprehensive prompt for any AI music platform
 - "suno": Optimized for Suno AI (use style tags format)
@@ -17,8 +18,15 @@ You must return a JSON object with exactly these 5 keys:
 - "musicgen": Optimized for MusicGen/AudioCraft (technical, concise)
 - "beatoven": Optimized for Beatoven.ai/AIVA (emotion-driven, cinematic)
 
-Each prompt should capture the exact mood, tempo, rhythm, instruments, vocal tone, and sound characteristics.
-Make prompts detailed and immediately usable. Return only valid JSON, no markdown.`;
+Each prompt MUST:
+1. Capture the exact mood, tempo, rhythm, instruments, vocal tone, and sound characteristics
+2. Include specific details about drum intensity, percussion characteristics, and rhythm regularity
+3. Reference the spectral characteristics (bass, mid, treble presence)
+4. Describe vocal tone and presence if applicable
+5. Include the unique characteristics that make this song distinctive
+6. Be detailed and immediately usable
+
+Return only valid JSON, no markdown.`;
 
   const userMessage = `Analyze this music and create AI generation prompts:
 
@@ -27,22 +35,49 @@ BPM: ${analysisData.bpm}
 Key: ${analysisData.key_full}
 Time Signature: ${analysisData.time_signature}
 Duration: ${analysisData.duration}
+
+=== Energy & Dynamics ===
 Energy Level: ${analysisData.energy_level}
+RMS Energy: ${(analysisData.rms_energy as number)?.toFixed(3) || "N/A"}
+Peak Level: ${(analysisData.peak_level as number)?.toFixed(3) || "N/A"}
 Dynamic Range: ${analysisData.dynamic_range}
+
+=== Spectral Analysis ===
 Brightness: ${analysisData.brightness}
+Spectral Centroid: ${analysisData.spectral_centroid_hz} Hz
+Spectral Spread: ${(analysisData.spectral_spread as number) || "N/A"} Hz
+Bass Presence: ${(analysisData.bass_presence as number)?.toFixed(2) || "N/A"}
+Mid Presence: ${(analysisData.mid_presence as number)?.toFixed(2) || "N/A"}
+Treble Presence: ${(analysisData.treble_presence as number)?.toFixed(2) || "N/A"}
+
+=== Rhythm & Percussion ===
 Texture: ${analysisData.texture}
 Rhythm Density: ${analysisData.rhythm_density}
+Rhythm Regularity: ${(analysisData.rhythm_regularity as number)?.toFixed(2) || "N/A"}
+Drum Intensity: ${(analysisData.drum_intensity as number)?.toFixed(2) || "N/A"}
+Percussion Characteristics: ${analysisData.percussion_characteristics || "N/A"}
+
+=== Harmonic Analysis ===
+Harmonic/Percussive Ratio: ${analysisData.hp_ratio} (>1 = melodic dominant)
+Harmonic Content: ${(analysisData.harmonic_content as number)?.toFixed(2) || "N/A"}
+Percussive Content: ${(analysisData.percussive_content as number)?.toFixed(2) || "N/A"}
+
+=== Vocal Characteristics ===
+Vocal Presence: ${(analysisData.vocal_presence as number)?.toFixed(2) || "N/A"}
+Vocal Tone: ${analysisData.vocal_tone || "N/A"}
+Vocal Range: ${analysisData.vocal_range || "N/A"}
+
+=== Style & Mood ===
 Mood Tags: ${(analysisData.mood_tags as string[]).join(", ")}
 Genre Hints: ${(analysisData.genre_hints as string[]).join(", ")}
-Harmonic/Percussive Ratio: ${analysisData.hp_ratio} (>1 = melodic dominant)
-Spectral Centroid: ${analysisData.spectral_centroid_hz} Hz
 
-Generate 5 platform-specific AI music prompts that would reproduce music with these exact characteristics.`;
+=== Unique Characteristics ===
+$${(analysisData.unique_characteristics as string[])?.map((c: string, i: number) => `${i + 1}. ${c}`).join("\n") || "N/A"}
 
-  // 단, generatePromptsWithLLM은 userId를 받지 않으며, 기본적으로 Manus LLM을 사용합니다.
-  // 나중에 userId를 매개변로 받도록 수정되면 generateWithSelectedLLM으로 교체할 수 있습니다.
+Generate 5 platform-specific AI music prompts that would reproduce music with THESE EXACT characteristics. Pay special attention to the unique characteristics and spectral analysis to ensure the generated music matches the original.`;
+
   const content = await generateWithSelectedLLM(
-    0, // 단, 매개변 userId를 받도록 수정 필요
+    0,
     [
       { role: "system", content: systemPrompt },
       { role: "user", content: userMessage },
@@ -100,10 +135,10 @@ export const musicRouter = router({
 
           await updateMusicAnalysis(analysisId, { audioUrl, audioKey: fileKey });
 
-          // Run Node.js-native audio analysis (no Python required)
-          const analysisResult = await analyzeAudioBuffer(audioBuffer, mimeType, fileName);
+          // Run advanced audio analysis with signal processing
+          const analysisResult = await advancedAnalyzeAudio(audioBuffer, mimeType, fileName);
 
-          // Generate LLM prompts
+          // Generate LLM prompts with enhanced analysis data
           const generatedPrompts = await generatePromptsWithLLM(analysisResult as unknown as Record<string, unknown>, fileName);
 
           // Save results
