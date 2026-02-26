@@ -46,3 +46,9 @@
 - [x] 장르별 가중치 기반 분석 로직 구현
 - [x] LLM 프롬프트 생성 로직 통합 (모든 분석 요소 포함)
 - [x] 통합 테스트 및 검증
+
+## Vercel 배포 문제 해결 (완료)
+- [x] 환경 변수 설정 (VITE_ANALYTICS_ENDPOINT, VITE_ANALYTICS_WEBSITE_ID 등)
+- [x] vercel.json 설정 파일 생성 (라우팅 설정)
+- [x] 빌드 설정 최적화
+- [x] 로컬 테스트 및 배포 재시도

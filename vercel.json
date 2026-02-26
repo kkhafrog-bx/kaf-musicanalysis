@@ -1,7 +1,37 @@
 {
   "version": 2,
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_ANALYTICS_ENDPOINT": "@vite_analytics_endpoint",
+    "VITE_ANALYTICS_WEBSITE_ID": "@vite_analytics_website_id",
+    "VITE_APP_ID": "@vite_app_id",
+    "VITE_OAUTH_PORTAL_URL": "@vite_oauth_portal_url",
+    "VITE_FRONTEND_FORGE_API_URL": "@vite_frontend_forge_api_url",
+    "VITE_FRONTEND_FORGE_API_KEY": "@vite_frontend_forge_api_key",
+    "VITE_APP_TITLE": "@vite_app_title",
+    "VITE_APP_LOGO": "@vite_app_logo",
+    "DATABASE_URL": "@database_url",
+    "JWT_SECRET": "@jwt_secret",
+    "OAUTH_SERVER_URL": "@oauth_server_url",
+    "BUILT_IN_FORGE_API_URL": "@built_in_forge_api_url",
+    "BUILT_IN_FORGE_API_KEY": "@built_in_forge_api_key",
+    "OWNER_OPEN_ID": "@owner_open_id",
+    "OWNER_NAME": "@owner_name"
+  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "dist/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
   ]
 }
