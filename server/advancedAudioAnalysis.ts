@@ -7,6 +7,12 @@
 import * as mm from "music-metadata";
 import WavDecoder from "wav-decoder";
 import FFT from "fft.js";
+import {
+  performComprehensiveAnalysis,
+  detectGenre,
+  analyzeGenreSpecifics,
+  ComprehensiveAnalysis,
+} from "./musicAnalysisModules";
 
 export interface AdvancedAnalysisResult {
   // Basic info
@@ -379,6 +385,19 @@ export async function advancedAnalyzeAudio(
     genre
   );
 
+  // Perform comprehensive analysis with new modules
+  const comprehensiveAnalysis = performComprehensiveAnalysis(
+    samples,
+    sampleRate,
+    bpm,
+    durationSecs,
+    rmsEnergy,
+    peakLevel,
+    spectrum.centroid,
+    vocals.presence,
+    genre
+  );
+
   return {
     bpm,
     key: "Unknown",
@@ -417,5 +436,7 @@ export async function advancedAnalyzeAudio(
     title: common.title,
     artist: common.artist,
     album: common.album,
-  };
+    // Comprehensive analysis data
+    _comprehensive: comprehensiveAnalysis,
+  } as any;
 }
