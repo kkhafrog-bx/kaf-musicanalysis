@@ -11,6 +11,11 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import KafCoreBadge from "@/components/KafCoreBadge";
 
+// SEO: Set page title
+if (typeof document !== 'undefined') {
+  document.title = "Music Prompt Lab - 음악 분석 및 프롬프트 생성";
+}
+
 // ─── Waveform Animation Component ─────────────────────────────────────────────
 function WaveformBars({ count = 20, className = "" }: { count?: number; className?: string }) {
   const heights = [30, 55, 80, 60, 90, 45, 70, 95, 50, 75, 40, 85, 65, 50, 78, 42, 68, 88, 55, 35];
